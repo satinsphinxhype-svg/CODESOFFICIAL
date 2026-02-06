@@ -186,19 +186,11 @@ function clearCanvas(){
 }
 
 let d=false;
-
-function start(x,y){
-  d=true;
-  ctx.beginPath();
-  ctx.moveTo(x,y);
-  ctx.arc(x,y,2,0,6.28);
-  ctx.fill();
-}
-
-function move(x,y){
-  if(!d) return;
-  ctx.lineTo(x,y);
-  ctx.stroke();
+function getPos(e){
+  const rect = canvas.getBoundingClientRect();
+  const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+  const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+  return [x, y];
 }
 
 function end(){ d=false; }
