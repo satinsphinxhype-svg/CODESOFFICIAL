@@ -166,49 +166,74 @@ const ctx = canvas.getContext("2d");
 
 ctx.lineWidth = 7;
 ctx.lineCap = "round";
+ctx.strokeStyle = "black";
 
-document.getElementById("colorPick").oninput = e => ctx.strokeStyle = ctx.fillStyle = e.target.value;
+/* color picker */
+document.getElementById("colorPick").oninput =
+  e => ctx.strokeStyle = e.target.value;
 
 /* open/close */
 function openDraw(){
   box.style.display = "block";
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  resizeCanvas();
 }
 
 function closeDraw(){
   box.style.display = "none";
 }
 
-/* ⭐ clear button */
 function clearCanvas(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
 }
 
-let d=false;
+/* ⭐ important fix: correct canvas size */
+function resizeCanvas(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener("resize", resizeCanvas);
+
+/* ===== DRAWING (FIXED) ===== */
+let drawing = false;
+
+/* get correct position inside canvas */
 function getPos(e){
   const rect = canvas.getBoundingClientRect();
   const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
   const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-  return [x, y];
+  return [x,y];
 }
 
-function end(){ d=false; }
+function start(e){
+  drawing = true;
+  const [x,y] = getPos(e);
+  ctx.beginPath();
+  ctx.moveTo(x,y);
+}
+
+function move(e){
+  if(!drawing) return;
+  const [x,y] = getPos(e);
+  ctx.lineTo(x,y);
+  ctx.stroke();
+}
+
+function end(){
+  drawing = false;
+}
 
 /* mouse */
-canvas.addEventListener("mousedown",start);
-canvas.addEventListener("mousemove",move);
-canvas.addEventListener("mouseup",end);
+canvas.addEventListener("mousedown", start);
+canvas.addEventListener("mousemove", move);
+canvas.addEventListener("mouseup", end);
 
 /* touch */
-canvas.addEventListener("touchstart",e=>{
-  const t=e.touches[0]; start(t.clientX,t.clientY);
-});
-canvas.addEventListener("touchmove",e=>{
+canvas.addEventListener("touchstart", start);
+canvas.addEventListener("touchmove", e=>{
   e.preventDefault();
-  const t=e.touches[0]; move(t.clientX,t.clientY);
+  move(e);
 });
-canvas.addEventListener("touchend",end);
+canvas.addEventListener("touchend", end);
 </script>
 <!-- 🤖 Robot -->
 <div id="robot">👾</div>
